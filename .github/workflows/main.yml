@@ -29,6 +29,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: devkitpro/devkitppc:20250527
+
     steps:
       - uses: actions/checkout@v4
 
@@ -39,24 +40,25 @@ jobs:
         run: make release -j2
 
       - name: Package
-        if: ${{ vars.ALLOW_UPLOADS == 'true' }}
         run: |
           mkdir -p upload/apps/usbloader_gx
-          cp boot.dol upload/apps/usbloader_gx
-          cp HBC/icon.png upload/apps/usbloader_gx
-          cp HBC/meta.xml upload/apps/usbloader_gx
-          echo "sha=$(git rev-parse --short=7 HEAD)" >> $GITHUB_ENV
+          cp boot.dol upload/apps/usbloader_gx/
+          cp HBC/icon.png upload/apps/usbloader_gx/
+          cp HBC/meta.xml upload/apps/usbloader_gx/
+          echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_ENV"
 
-      - name: Upload binary
-        if: ${{ vars.ALLOW_UPLOADS == 'true' }}
+      - name: Upload release artifact
         uses: actions/upload-artifact@v4
-        with: 
-          name: usbloadergx_${{ env.sha }}
-          path: upload
+        with:
+          name: usbloadergx_1
+          path: upload/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Upload debug binary
-        if: ${{ vars.ALLOW_UPLOADS == 'true' }}
         uses: actions/upload-artifact@v4
-        with: 
-          name: usbloadergx_${{ env.sha }}_debug
+        with:
+          name: usbloadergx_1_debug
           path: boot.elf
+          if-no-files-found: warn
+          retention-days: 14
